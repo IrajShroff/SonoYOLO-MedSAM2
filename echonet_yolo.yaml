@@ -1,0 +1,8 @@
+# YOLOv8-compatible EchoNet-Dynamic dataset
+path: /home/iraj/echonet_yolo
+train: images/train
+val: images/val
+test: images/test
+
+names:
+  0: left_ventricle
