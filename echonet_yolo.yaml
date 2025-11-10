@@ -1,5 +1,5 @@
-# YOLOv8-compatible EchoNet-Dynamic dataset
-path: /home/iraj/echonet_yolo
+# YOLOv11-compatible EchoNet-Dynamic dataset
+path: pathtofolder
 train: images/train
 val: images/val
 test: images/test
