@@ -1,8 +1,7 @@
 # SonoYOLO + MedSAM2: A Fully Automated Pipeline for Left Ventricle Detection and Segmentation in Cardiac Ultrasound Videos
 
 ## Abstract
-Precise evaluation of cardiac function is essential for early diagnosis, risk assessment, and treatment of cardiovascular diseases. Cardiac ultrasound videos are widely used for this purpose, but cardiologists need to manually delineate the regions of interest in the videos, which is a time-consuming and error-prone process. While many automatic video segmentation methods exist, modern deep learning-based methods require dense annotations for training, which is labor-intensive. Recent zero-shot segmentation models specialized for medical data such as MedSAM2 do not require such dense annotations, but they still need manual prompts (e.g., bounding boxes), which hinders automatic deployment.  
-To address these challenges, we propose a fully automated pipeline for detecting and segmenting the Left Ventricle (LV) in cardiac ultrasound videos. The proposed pipeline (SonoYOLO + MedSAM2) consists of a detection model (SonoYOLO) obtained by finetuning YOLOv11-nano to localize the LV in each frame, and a segmentation model (MedSAM2) that receives a bounding box as a prompt and segments the LV. The resulting mask is then used as a prompt for the next frame, ensuring temporal consistency. Experiments on the EchoNet-Dynamic dataset show strong performance and generalizability without requiring dense annotations or manual prompts.
+Precise evaluation of cardiac function is essential for early diagnosis, risk assessment, and treatment of cardiovascular diseases. Cardiac ultrasound videos are widely used for this purpose, but cardiologists need to manually delineate the regions of interest in the videos, which is a time-consuming and error-prone process. While many automatic video segmentation methods exist, modern deep learning-based methods require dense annotations for training, which is labor-intensive. Recent zero-shot segmentation models specialized for medical data such as MedSAM2 do not require such dense annotations, but they still need manual prompts (e.g., bounding boxes), which hinders automatic deployment. To address these challenges, we propose a fully automated pipeline for detecting and segmenting regions of interest in cardiac ultrasound videos. The proposed pipeline (SonoYOLO + MedSAM2) consists of a detection model (SonoYOLO) obtained by finetuning YOLOv11-nano to localize the LV in an image, and a segmentation model (MedSAM2) that receives a bounding box as a prompt and segments the LV. The resulting image mask is used as a prompt to segment the next image and so on, thus achieving temporal consistency across the video. Experiments on EchoNet-Dynamic and EchoNet-Pediatric datasets show strong performance and generalizability of our pipeline without requiring dense annotations or manual prompts.
 
 ---
 
@@ -22,6 +21,7 @@ https://echonet.github.io/dynamic/index.html#dataset
 ├── SonoYolo + MedSAM2 frame-wise.ipynb
 ├── sonoyolo_requirements.txt
 ├── medsam2_requirements.txt
+├── echonet_yolo.yaml
 └── README.md
 ```
 
@@ -53,7 +53,7 @@ pip install ultralytics
 python SonoYOLO_Training.py
 ```
 
-### Testing (Generate LV bounding boxes)
+### Testing (SonoYOLO LV predicted bounding boxes)
 ```bash
 python SonoYOLO_Testing.py
 ```
@@ -96,16 +96,15 @@ pip install gradio==3.38.0 numpy==1.26.3 ffmpeg-python moviepy
 
 After generating bounding boxes with SonoYOLO, you can run **three different segmentation methods**, each corresponding to a method from the paper.
 
-## Method 1 — Forward Propagation (Recommended)
-Segments frame 0 → uses that mask to segment frame 1 → ... → end.
-
+## Method 1 — Forward Propagation 
+Refer to paper to understand method.
 ```bash
 conda activate medsam2
 jupyter notebook "SonoYolo + MedSAM2 forward propagation.ipynb"
 ```
 
 ## Method 2 — Backward Propagation
-Starts from final frame → propagates backward for greater temporal stability in some cases.
+Refer to paper to understand method.
 
 ```bash
 conda activate medsam2
@@ -113,18 +112,13 @@ jupyter notebook "SonoYolo + MedSAM2 backward propagation.ipynb"
 ```
 
 ## Method 3 — Frame-wise Zero-Shot Segmentation
-Runs MedSAM2 independently on each frame using only YOLO bounding boxes.
+Runs MedSAM2 independently on each frame using only SonoYOLO bounding boxes as prompts.
 
 ```bash
 conda activate medsam2
 jupyter notebook "SonoYolo + MedSAM2 frame-wise.ipynb"
 ```
 
-Each notebook loads:
-- YOLO detection results  
-- EchoNet-Dynamic videos  
-- MedSAM2 model  
-- And performs LV segmentation under the selected method
 
 ---
 
@@ -133,9 +127,7 @@ Each notebook loads:
 You will obtain:
 
 - **Per-frame Left Ventricle segmentation masks**
-- **Optional reconstructed segmentation videos**
-- **CSV logs** (if enabled)
-- **Evaluation metrics** (Dice, IoU, Boundary accuracy, etc. depending on your setup)
+- **CSV DSC logs** (if enabled)
 
 ---
 
